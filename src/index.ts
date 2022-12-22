@@ -1,1 +1,3 @@
-console.log("hello ts");
+import { start } from "./app/app";
+
+start();
