@@ -9,10 +9,8 @@ import url from "url";
 import { loadBalancer } from "./load-balancer";
 
 const PORT: number = +process.env.PORT || 4000;
-
-export const primaryServer = http.createServer();
-
-export const workerServer = http.createServer(routes);
+const primaryServer = http.createServer();
+const workerServer = http.createServer(routes);
 
 export function start(): void {
     const args: any = process.argv.slice(2).reduce((acc: any, el) => {
@@ -55,7 +53,7 @@ export function start(): void {
                 .listen(PORT, () => {
                     console.log(`Worker ${process.pid} server running at http://localhost:${PORT}/`);
                 })
-                .on("request", (req, res) => {
+                .on("request", () => {
                     console.log(workerServer.address());
                 });
         }
@@ -66,7 +64,11 @@ export function start(): void {
     }
 
     process.on("SIGINT", async () => {
-        await writeFile(usersDbPath, JSON.stringify([]));
+        try {
+            await writeFile(usersDbPath, JSON.stringify([]));
+        } catch (error) {
+            console.log(error);
+        }
         workerServer.close();
         primaryServer.close();
         process.exit();
