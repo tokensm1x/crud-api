@@ -2,7 +2,7 @@ import "dotenv/config";
 import http from "http";
 import { routes } from "./routes";
 
-const PORT = process.env.PORT || 4000;
+const PORT: number | string = process.env.PORT || 4000;
 
 export const server = http.createServer(routes);
 

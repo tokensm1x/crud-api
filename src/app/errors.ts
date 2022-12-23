@@ -1,7 +1,10 @@
-export const ERR_USERID_INVALID = "User id is invalid";
-export const ERR_USER_NOT_FOUND = "User not found";
-export const ERR_BODY_INVALID_FORMAT = "Invalid request body format";
-export const ERR_BODY_VALIDATION = "Request body does not contain required fields";
-export const ERR_UNSUPPORTED_OPERATION = "Unsupported operation";
-export const ERR_RESOURCE_NOT_FOUND = "Requested resource not found";
-export const ERR_UNEXPECTED_ERROR = "Unexpected error has occured, try again later";
+export const INVALID_ID_ERROR: string = "Invalid user id";
+export const USER_NOT_FOUND_ERROR: string = "User not found";
+export const INVALID_DATA_ERROR: string = "Invalid Data. Please enter a valid Data.";
+export const UNSUPPORTED_METHOD_ERROR: string = "Method not allowed";
+export const ROUTE_NOT_FOUND_ERROR: string = "Requested resource not found";
+export const SOMETHING_WENT_WRONG: string = "Something went wrong, try again later";
+
+export class NotFoundError extends Error {}
+export class ValidationError extends Error {}
+export class UnsupportedMethodError extends Error {}
