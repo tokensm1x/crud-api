@@ -93,7 +93,6 @@ export function routes(req: IncomingMessage, res: ServerResponse) {
         });
     } catch (error: any) {
         console.log(error.message);
-        console.log(555);
         res.writeHead(500);
         res.end(
             JSON.stringify({

@@ -14,7 +14,6 @@ export class UserService {
     constructor() {}
 
     async createUser(data: IUser): Promise<IUser> {
-        console.log(data);
         const users: IUser[] = await getUsersDb();
         const newUser: IUser = Object.assign(new User(), { ...data, id: uuid_v4() });
         users.push(newUser);
