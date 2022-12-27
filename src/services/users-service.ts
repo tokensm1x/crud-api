@@ -1,6 +1,5 @@
 import { IUser } from "src/models/user";
-import { getUsersDb, usersDbPath } from "../in-memory-db/get-users-db";
-import { writeFile } from "fs/promises";
+import { eventEmitter } from "../in-memory-db/constants";
 import { v4 as uuid_v4, validate } from "uuid";
 import { User } from "../entity/user";
 import {
@@ -10,26 +9,29 @@ import {
     USER_NOT_FOUND_ERROR,
     ValidationError,
 } from "../app/errors";
-export class UserService {
-    constructor() {}
+import cluster from "cluster";
 
+export class UserService {
+    usersDB: IUser[];
+
+    constructor() {}
     async createUser(data: IUser): Promise<IUser> {
-        const users: IUser[] = await getUsersDb();
+        const users = await this.getDBUsers();
         const newUser: IUser = Object.assign(new User(), { ...data, id: uuid_v4() });
         users.push(newUser);
-        await writeFile(usersDbPath, JSON.stringify(users));
         return new Promise((res) => {
+            process.send({ method: "post", users: users });
             res(newUser);
         });
     }
 
     async editUser(data: IUser, id: string): Promise<IUser> {
-        const users: IUser[] = await getUsersDb();
+        const users = await this.getDBUsers();
         let user: IUser = users.find((el) => el.id === id);
         if (user) {
             user = Object.assign(user, { ...data });
-            await writeFile(usersDbPath, JSON.stringify(users));
             return new Promise((res) => {
+                process.send({ method: "post", users: users });
                 res(user);
             });
         } else {
@@ -38,14 +40,14 @@ export class UserService {
     }
 
     async getAllUsers(): Promise<IUser[]> {
-        const users: IUser[] = await getUsersDb();
+        const users = await this.getDBUsers();
         return new Promise((res) => {
             res(users);
         });
     }
 
     async getUserById(id: string): Promise<IUser> {
-        const users: IUser[] = await getUsersDb();
+        const users = await this.getDBUsers();
         const user: IUser = users.find((el) => el.id === id);
         if (user) {
             return new Promise((res) => {
@@ -57,17 +59,27 @@ export class UserService {
     }
 
     async deleteUser(id: string): Promise<null> {
-        const users: IUser[] = await getUsersDb();
+        const users = await this.getDBUsers();
         const userIndex: number = users.findIndex((el) => el.id === id);
         if (userIndex >= 0) {
             users.splice(userIndex, 1);
-            await writeFile(usersDbPath, JSON.stringify(users));
             return new Promise((res) => {
+                process.send({ method: "post", users: users });
                 res(null);
             });
         } else {
             throw new NotFoundError(USER_NOT_FOUND_ERROR);
         }
+    }
+
+    async getDBUsers(): Promise<IUser[]> {
+        process.send({ method: "get" });
+        return new Promise((res) => {
+            process.once("message", (users: IUser[]) => {
+                this.usersDB = users;
+                res(users);
+            });
+        });
     }
 
     validateUserId(id: string): void {

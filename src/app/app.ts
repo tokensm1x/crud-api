@@ -3,15 +3,13 @@ import http, { IncomingMessage, ServerResponse } from "http";
 import { routes } from "./routes";
 import cluster from "cluster";
 import { cpus } from "os";
-import { usersDbPath } from "../in-memory-db/get-users-db";
-import { writeFile } from "fs/promises";
-import url from "url";
+import { usersCp, eventEmitter } from "../in-memory-db/constants";
 import { loadBalancer } from "./load-balancer";
+import { fork } from "child_process";
 
 const PORT: number = +process.env.PORT || 4000;
 const primaryServer = http.createServer();
 const workerServer = http.createServer(routes);
-
 export function start(): void {
     const args: any = process.argv.slice(2).reduce((acc: any, el) => {
         acc[el] = true;
@@ -20,6 +18,7 @@ export function start(): void {
 
     if (args["--multi"]) {
         if (cluster.isPrimary) {
+            const usersDB = fork(usersCp);
             const cpusAmount: number = cpus().length;
             let i = 1;
             primaryServer
@@ -47,6 +46,18 @@ export function start(): void {
             cluster.on("exit", (worker) => {
                 console.log(`worker ${worker.process.pid} died`);
             });
+
+            let currentWorker: any;
+
+            cluster.on("message", (worker, data) => {
+                currentWorker = worker;
+                usersDB.send({ method: data.method, users: data.users });
+            });
+
+            usersDB.on("message", (users) => {
+                currentWorker.send(users);
+                // eventEmitter.emit("$users", users);
+            });
         } else {
             const PORT = +process.env.WORKER_PORT;
             workerServer
@@ -58,17 +69,16 @@ export function start(): void {
                 });
         }
     } else {
-        workerServer.listen(PORT, () => {
-            console.log(`Server running at http://localhost:${PORT}/`);
-        });
+        workerServer
+            .listen(PORT, () => {
+                console.log(`Server running at http://localhost:${PORT}/`);
+            })
+            .on("request", () => {
+                console.log(workerServer.address());
+            });
     }
 
     process.on("SIGINT", async () => {
-        try {
-            await writeFile(usersDbPath, JSON.stringify([]));
-        } catch (error) {
-            console.log(error);
-        }
         workerServer.close();
         primaryServer.close();
         process.exit();
