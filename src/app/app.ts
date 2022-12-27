@@ -1,32 +1,35 @@
 import "dotenv/config";
 import http, { IncomingMessage, ServerResponse } from "http";
-import { routes } from "./routes";
+import routes from "./routes";
 import cluster from "cluster";
+import parseArgs from "../helpers/args";
+import loadBalancer from "./load-balancer";
 import { cpus } from "os";
-import { usersCp, eventEmitter } from "../in-memory-db/constants";
-import { loadBalancer } from "./load-balancer";
+import { usersCp as usersPath } from "./constants";
 import { fork } from "child_process";
+import { IUser } from "src/models/user";
+import { IRequestOptions } from "src/models/request";
 
 const PORT: number = +process.env.PORT || 4000;
 const primaryServer = http.createServer();
 const workerServer = http.createServer(routes);
-export function start(): void {
-    const args: any = process.argv.slice(2).reduce((acc: any, el) => {
-        acc[el] = true;
-        return acc;
-    }, {});
+
+export function startApp(): void {
+    const args: any = parseArgs();
 
     if (args["--multi"]) {
         if (cluster.isPrimary) {
-            const usersDB = fork(usersCp);
+            const usersDB: any = fork(usersPath);
             const cpusAmount: number = cpus().length;
-            let i = 1;
+            let currentWorker: any;
+            let i: number = 1;
+
             primaryServer
                 .listen(PORT, () => {
                     console.log(`Load Balancer server running at http://localhost:${PORT}/`);
                 })
                 .on("request", (req: IncomingMessage, res: ServerResponse) => {
-                    const options = {
+                    const options: IRequestOptions = {
                         host: "localhost",
                         port: PORT + i++,
                         path: req.url,
@@ -43,29 +46,27 @@ export function start(): void {
                 cluster.fork({ WORKER_PORT: PORT + i + 1 });
             }
 
-            cluster.on("exit", (worker) => {
+            cluster.on("exit", (worker: any) => {
                 console.log(`worker ${worker.process.pid} died`);
             });
 
-            let currentWorker: any;
-
-            cluster.on("message", (worker, data) => {
+            cluster.on("message", (worker: any, data: any) => {
                 currentWorker = worker;
                 usersDB.send({ method: data.method, users: data.users });
             });
 
-            usersDB.on("message", (users) => {
+            usersDB.on("message", (users: IUser[]) => {
                 currentWorker.send(users);
-                // eventEmitter.emit("$users", users);
             });
         } else {
-            const PORT = +process.env.WORKER_PORT;
+            const PORT: number = +process.env.WORKER_PORT;
             workerServer
                 .listen(PORT, () => {
                     console.log(`Worker ${process.pid} server running at http://localhost:${PORT}/`);
                 })
                 .on("request", () => {
-                    console.log(workerServer.address());
+                    const requestPort: number = workerServer.address()["port"];
+                    console.log(`Server request at http://localhost:${requestPort}/`);
                 });
         }
     } else {
@@ -74,7 +75,8 @@ export function start(): void {
                 console.log(`Server running at http://localhost:${PORT}/`);
             })
             .on("request", () => {
-                console.log(workerServer.address());
+                const requestPort: number = workerServer.address()["port"];
+                console.log(`Server request at http://localhost:${requestPort}/`);
             });
     }
 

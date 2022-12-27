@@ -1,4 +1,6 @@
-let usersDB = [];
+import { IUser } from "src/models/user";
+
+let usersDB: IUser[] = [];
 
 process.on("message", (data: any) => {
     switch (data.method) {

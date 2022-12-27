@@ -1,20 +1,14 @@
 import { IncomingMessage, ServerResponse } from "http";
 import url from "url";
-import {
-    ROUTE_NOT_FOUND_ERROR,
-    NotFoundError,
-    ValidationError,
-    SOMETHING_WENT_WRONG,
-    UNSUPPORTED_METHOD_ERROR,
-    UnsupportedMethodError,
-} from "./errors";
+import { NotFoundError, ValidationError, UnsupportedMethodError } from "./errors";
+import { ROUTE_NOT_FOUND_ERROR, SOMETHING_WENT_WRONG, UNSUPPORTED_METHOD_ERROR } from "./constants";
 import { UserController } from "../controllers/user-controller";
 import { UserService } from "../services/users-service";
 
 const usersService: UserService = new UserService();
 const usersController: UserController = new UserController(usersService);
 
-export function routes(req: IncomingMessage, res: ServerResponse) {
+export default function routes(req: IncomingMessage, res: ServerResponse): void {
     try {
         res.setHeader("Content-Type", "application/json");
         const data: Uint8Array[] = [];
@@ -32,7 +26,7 @@ export function routes(req: IncomingMessage, res: ServerResponse) {
                 let status: number = 200;
                 let result: any;
                 try {
-                    const body = data.length ? JSON.parse(Buffer.concat(data).toString()) : {};
+                    const body: any = data.length ? JSON.parse(Buffer.concat(data).toString()) : {};
                     switch (req.method) {
                         case "POST": {
                             if (id) {
