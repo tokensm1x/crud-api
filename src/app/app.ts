@@ -5,7 +5,7 @@ import cluster from "cluster";
 import parseArgs from "../helpers/args";
 import loadBalancer from "./load-balancer";
 import { cpus } from "os";
-import { usersCp as usersPath } from "./constants";
+import { usersPath } from "./constants";
 import { fork } from "child_process";
 import { IUser } from "src/models/user";
 import { IRequestOptions } from "src/models/request";

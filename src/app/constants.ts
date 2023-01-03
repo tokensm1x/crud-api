@@ -1,7 +1,7 @@
 import { resolve } from "path";
 import { cwd } from "process";
 
-export const usersCp = resolve(cwd(), "src/in-memory-db/users-db.ts");
+export const usersPath = resolve(cwd(), "src/in-memory-db/users-db.ts");
 export const INVALID_ID_ERROR: string = "Invalid user id";
 export const USER_NOT_FOUND_ERROR: string = "User not found";
 export const INVALID_DATA_ERROR: string = "Invalid Data. Please enter a valid Data.";

@@ -1,5 +1,5 @@
 import { IUser } from "../models/user";
-import { usersCp } from "../app/constants";
+import { usersPath } from "../app/constants";
 import { v4 as uuid_v4, validate } from "uuid";
 import { User } from "../entity/user";
 import { NotFoundError, ValidationError } from "../app/errors";
@@ -14,7 +14,7 @@ export class UserService {
 
     constructor() {
         if (cluster.isPrimary) {
-            this.process = fork(usersCp);
+            this.process = fork(usersPath);
         }
     }
 
