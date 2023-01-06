@@ -9,7 +9,7 @@ process.on("message", (data: any) => {
         case "put": {
             let user: IUser = usersDB.find((el) => el.id === data.data.id);
             if (user) {
-                user = Object.assign(user, { ...data.data });
+                user = Object.assign(user, { ...data.data.data });
                 process.send(user);
             } else {
                 process.send(null);
@@ -17,7 +17,7 @@ process.on("message", (data: any) => {
             break;
         }
         case "post": {
-            const newUser: IUser = Object.assign(new User(), { ...data.data, id: uuid_v4() });
+            const newUser: IUser = Object.assign(new User(), { ...data.data.data, id: uuid_v4() });
             usersDB.push(newUser);
             process.send(newUser);
             break;
