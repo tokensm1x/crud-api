@@ -7,12 +7,12 @@ import loadBalancer from "./load-balancer";
 import { cpus } from "os";
 import { usersPath } from "./constants";
 import { fork } from "child_process";
-import { IUser } from "src/models/user";
-import { IRequestOptions } from "src/models/request";
+import { IUser } from "../models/user";
+import { IRequestOptions } from "../models/request";
 
 const PORT: number = +process.env.PORT || 4000;
-const primaryServer = http.createServer();
-const workerServer = http.createServer(routes);
+export const primaryServer = http.createServer();
+export const workerServer = http.createServer(routes);
 
 export function startApp(): void {
     const args: any = parseArgs();

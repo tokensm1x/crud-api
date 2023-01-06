@@ -4,6 +4,7 @@
     "module": "commonjs",
     "baseUrl": "./",
     "outDir": "./dist",
+    "rootDir": "./src",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
@@ -11,6 +12,9 @@
     "noImplicitAny": false,
     "strictNullChecks": false,
     "skipLibCheck": true
+  },
+  "ts-node": {
+    "esm": true
   },
 	"exclude": [
 		"node_modules",
