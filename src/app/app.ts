@@ -52,7 +52,7 @@ export function startApp(): void {
 
             cluster.on("message", (worker: any, data: any) => {
                 currentWorker = worker;
-                usersDB.send({ method: data.method, users: data.users });
+                usersDB.send({ method: data.method, data: data.data });
             });
 
             usersDB.on("message", (users: IUser[]) => {

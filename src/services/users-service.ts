@@ -18,34 +18,27 @@ export class UserService {
         }
     }
 
-    private async getDBUsers(): Promise<IUser[]> {
-        this.process.send({ method: "get" });
+    private async dbRequest(method, data?): Promise<IUser[] | IUser | any> {
+        this.process.send({ method: method, data: data });
         return new Promise((res) => {
-            this.process.once("message", (users: IUser[]) => {
-                this.usersDB = users;
-                res(users);
+            this.process.once("message", (response: any) => {
+                res(response);
             });
         });
     }
 
     public async createUser(data: IUser): Promise<IUser> {
-        const users: IUser[] = await this.getDBUsers();
-        const newUser: IUser = Object.assign(new User(), { ...data, id: uuid_v4() });
-        users.push(newUser);
+        const response: IUser = await this.dbRequest("post", { data: data });
         return new Promise((res) => {
-            this.process.send({ method: "post", users: users });
-            res(newUser);
+            res(response);
         });
     }
 
     public async editUser(data: IUser, id: string): Promise<IUser> {
-        const users: IUser[] = await this.getDBUsers();
-        let user: IUser = users.find((el) => el.id === id);
-        if (user) {
-            user = Object.assign(user, { ...data });
+        const response: IUser | null = await this.dbRequest("put", { data: data, id: id });
+        if (response) {
             return new Promise((res) => {
-                this.process.send({ method: "post", users: users });
-                res(user);
+                res(response);
             });
         } else {
             throw new NotFoundError(USER_NOT_FOUND_ERROR);
@@ -53,18 +46,17 @@ export class UserService {
     }
 
     public async getAllUsers(): Promise<IUser[]> {
-        const users: IUser[] = await this.getDBUsers();
+        const response: IUser[] = await this.dbRequest("getAll");
         return new Promise((res) => {
-            res(users);
+            res(response);
         });
     }
 
     public async getUserById(id: string): Promise<IUser> {
-        const users: IUser[] = await this.getDBUsers();
-        const user: IUser = users.find((el) => el.id === id);
-        if (user) {
+        const response: IUser | null = await this.dbRequest("getById", { id: id });
+        if (response) {
             return new Promise((res) => {
-                res(user);
+                res(response);
             });
         } else {
             throw new NotFoundError(USER_NOT_FOUND_ERROR);
@@ -72,12 +64,9 @@ export class UserService {
     }
 
     public async deleteUser(id: string): Promise<null> {
-        const users: IUser[] = await this.getDBUsers();
-        const userIndex: number = users.findIndex((el) => el.id === id);
-        if (userIndex >= 0) {
-            users.splice(userIndex, 1);
+        const response: any = await this.dbRequest("delete", { id: id });
+        if (response) {
             return new Promise((res) => {
-                this.process.send({ method: "post", users: users });
                 res(null);
             });
         } else {
