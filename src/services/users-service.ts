@@ -6,6 +6,7 @@ import { NotFoundError, ValidationError } from "../app/errors";
 import { INVALID_ID_ERROR, USER_NOT_FOUND_ERROR, validationErrors } from "../app/constants";
 import { fork } from "child_process";
 import cluster from "cluster";
+import { handleRequest } from "../in-memory-db/users-requests";
 
 export class UserService {
     process: any = process;
@@ -13,18 +14,24 @@ export class UserService {
     usersDB: IUser[];
 
     constructor() {
-        if (cluster.isPrimary) {
-            this.process = fork(usersPath);
-        }
+        // if (cluster.isPrimary) {
+        //     this.process = fork(usersPath);
+        // }
     }
 
     private async dbRequest(method, data?): Promise<IUser[] | IUser | any> {
-        this.process.send({ method: method, data: data });
-        return new Promise((res) => {
-            this.process.once("message", (response: any) => {
-                res(response);
+        if (cluster.isPrimary) {
+            return new Promise((res) => {
+                res(handleRequest({ method: method, data: data }, true));
             });
-        });
+        } else {
+            this.process.send({ method: method, data: data });
+            return new Promise((res) => {
+                this.process.once("message", (response: any) => {
+                    res(response);
+                });
+            });
+        }
     }
 
     public async createUser(data: IUser): Promise<IUser> {
