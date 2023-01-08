@@ -1,7 +1,5 @@
 # CRUD API
 
-[TASK](https://github.com/AlreadyBored/nodejs-assignments/blob/main/assignments/crud-api/assignment.md)
-
 ## INSTALLATION
 
 Install packages
