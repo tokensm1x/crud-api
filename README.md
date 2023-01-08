@@ -1,6 +1,6 @@
 # CRUD API
 
-[TASK](https://github.com/AlreadyBored/nodejs-assignments/blob/main/assignments/crud-api/assignment.md).
+[TASK](https://github.com/AlreadyBored/nodejs-assignments/blob/main/assignments/crud-api/assignment.md)
 
 ## INSTALLATION
 
@@ -24,21 +24,19 @@ Run production mode
 npm run start:prod
 ```
 
-Run tests
-
-```
-npm run start:test
-```
-
 Run multi development mode
 
 ```
 npm run start:multi
 ```
 
-## API URL's
+Run tests
 
-Implemented endpoint: `api/users`
+```
+npm run start:test
+```
+
+## API URL's
 
 `GET api/users` - get all users
 
@@ -50,7 +48,7 @@ Implemented endpoint: `api/users`
 
 `DELETE api/users/${id}` - delete user
 
-### REQUIRED FIELDS(POST && PUT)
+### REQUIRED FIELDS(POST & PUT)
 
 `username` — user's name (string, **required**)
 
