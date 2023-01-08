@@ -113,10 +113,10 @@ export class UserService {
             error = AGE_NOT_EXIST_ERROR;
         } else if (!ageIsNumber) {
             error = AGE_IS_INVALID_ERROR;
-        } else if (!hobbiesIsArray) {
-            error = HOBBIES_IS_INVALID_ERROR;
         } else if (!hobbies) {
             error = HOBBIES_NOT_EXIST_ERROR;
+        } else if (!hobbiesIsArray) {
+            error = HOBBIES_IS_INVALID_ERROR;
         } else if (!isValidHobbies) {
             error = HOBBIES_IS_INVALID_ERROR;
         }
