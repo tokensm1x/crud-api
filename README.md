@@ -44,9 +44,9 @@ npm run start:test
 
 `POST api/users` - create new user
 
-`PUT api/users/${id}` - update user
+`PUT api/users/${id}` - update user (uuid)
 
-`DELETE api/users/${id}` - delete user
+`DELETE api/users/${id}` - delete user (uuid)
 
 ### REQUIRED FIELDS(POST & PUT)
 
